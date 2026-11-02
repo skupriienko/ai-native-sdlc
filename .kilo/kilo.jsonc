@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Kilo-Org/kilocode/main/schemas/kilo.json",
+  "version": "1.0.0",
+  "name": "ai-native-sdlc",
+  "description": "6-Phase Artifact Loop Engine & Spec-Driven Development Framework for AI Coding Agents",
+  "tools": [
+    {
+      "name": "sdlc",
+      "command": "sdlc",
+      "description": "Enforces Anthropic-style AI SDLC: intent.md -> spec.md -> plan.md -> tasks.md -> test-lock -> receipt.md."
+    }
+  ],
+  "rules": [
+    ".kilo/rules/ai-native-sdlc.md"
+  ]
+}
