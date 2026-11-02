@@ -1,9 +1,11 @@
 """CLI interface for ai-native-sdlc."""
+
 import argparse
 import json
 import sys
-from pathlib import Path
+
 from ai_native_sdlc.workflow import SDLCManager
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -32,6 +34,7 @@ def main() -> None:
         print(json.dumps(res, indent=2))
         if not res["complete"]:
             sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

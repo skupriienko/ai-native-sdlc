@@ -1,10 +1,12 @@
 import time
 from pathlib import Path
+
 from ai_native_sdlc.workflow import SDLCManager
+
 
 def test_stress_sdlc_manager(tmp_path: Path):
     mgr = SDLCManager(tmp_path / "artifacts")
-    
+
     # Init 100 epics concurrently
     t0 = time.perf_counter()
     for i in range(100):

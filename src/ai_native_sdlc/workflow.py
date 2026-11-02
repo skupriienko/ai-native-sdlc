@@ -1,9 +1,10 @@
 """ai_native_sdlc — 6-Phase Artifact Loop Engine."""
+
 from __future__ import annotations
 
-import json
+import re
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 PHASES = ["intent", "spec", "plan", "tasks", "test_lock", "receipt"]
 
@@ -38,17 +39,37 @@ PHASE_TEMPLATES = {
 - Status: SUCCESS
 - Verification Hash: <sha256>
 - Sensor Attestation: <all sensors pass>
-"""
+""",
 }
 
+
+def sanitize_epic_name(epic_name: str) -> str:
+    """Sanitizes epic name to prevent CWE-22 path traversal attacks."""
+    # Strip dangerous characters and path separators
+    clean = re.sub(r"[^a-zA-Z0-9_-]", "-", epic_name).strip("-")
+    if not clean:
+        raise ValueError("Invalid epic name: must contain alphanumeric characters")
+    return clean
+
+
 class SDLCManager:
-    """Manages the 6-phase artifact loop for an epic."""
+    """Manages the 6-phase artifact loop for an epic with CWE-22 traversal protection."""
 
     def __init__(self, base_dir: Path | str = ".ai/artifacts") -> None:
-        self.base_dir = Path(base_dir)
+        self.base_dir = Path(base_dir).resolve()
+
+    def _resolve_epic_dir(self, epic_name: str) -> Path:
+        safe_name = sanitize_epic_name(epic_name)
+        target = (self.base_dir / safe_name).resolve()
+        # Enforce boundary within base_dir
+        if not target.is_relative_to(self.base_dir):
+            raise ValueError(
+                f"Security Alert: Path traversal attempt blocked for epic '{epic_name}'"
+            )
+        return target
 
     def init_epic(self, epic_name: str) -> Path:
-        epic_dir = self.base_dir / epic_name
+        epic_dir = self._resolve_epic_dir(epic_name)
         epic_dir.mkdir(parents=True, exist_ok=True)
         for phase, template in PHASE_TEMPLATES.items():
             f = epic_dir / f"{phase}.md"
@@ -56,14 +77,14 @@ class SDLCManager:
                 f.write_text(template, encoding="utf-8")
         return epic_dir
 
-    def check_epic(self, epic_name: str) -> Dict[str, Any]:
-        epic_dir = self.base_dir / epic_name
+    def check_epic(self, epic_name: str) -> dict[str, Any]:
+        epic_dir = self._resolve_epic_dir(epic_name)
         status = {}
         for phase in PHASES:
             f = epic_dir / f"{phase}.md"
             status[phase] = f.exists()
         return {
-            "epic": epic_name,
+            "epic": sanitize_epic_name(epic_name),
             "complete": all(status.values()),
             "phases": status,
         }
