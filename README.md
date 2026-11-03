@@ -8,39 +8,32 @@
 [![Types: Mypy](https://img.shields.io/badge/types-mypy-blue.svg)](https://mypy-lang.org/)
 
 > **6-Phase Artifact Loop Engine & Spec-Driven Development Framework for AI Coding Agents**  
-> Enforces Anthropic-style AI SDLC: intent.md -> spec.md -> plan.md -> tasks.md -> test-lock -> receipt.md.
+> Enforces Anthropic-style AI SDLC: `intent.md` -> `spec.md` -> `plan.md` -> `tasks.md` -> `test_lock.md` -> `receipt.md`.
 
 ---
 
 ## 🚀 Key Highlights
 
-- **Pure Python Standard Library:** Zero heavy runtime dependencies. Lightning-fast startup (<10ms).
+- **6-Phase Artifact Cycle:** Eliminates unstructured hallucination by forcing agents to define spec, plan, tasks, and test locks before modifying code.
+- **CWE-22 Path Traversal Defense:** Sanitizes all epic identifiers and enforces strict filesystem boundary confinement.
+- **Structured Artifact Templates:** Auto-generates aerospace-grade markdown artifact scaffolding.
 - **Native AI Tooling Integration:** Official first-class configuration for **Kilo Code**, **Claude Code**, **Cursor**, **Windsurf**, and **GitHub Copilot**.
-- **Determinism & Performance:** Tested under extreme concurrency and heavy scale with sub-millisecond execution.
-- **Enterprise-Grade Scaffolding:** Full modern PEP 517/621 packaging, PEP 561 typing (`py.typed`), Ruff linter, and pre-commit hooks.
+- **Determinism & Performance:** Benchmarked initializing 100 parallel epics in <0.5s.
 
 ---
 
 ## ⚡ Architecture & Workflow
 
 ```mermaid
-flowchart LR
-    A["Input / Task"] --> B["ai-native-sdlc Engine"]
-    B --> C["Deterministic Verification"]
-    C --> D["[RECEIPT] Clean Output"]
+flowchart TD
+    UserProblem["User Feature / Bug Request"] --> Phase1["1. intent.md (Problem & Outcomes)"]
+    Phase1 --> Phase2["2. spec.md (Architecture & Contracts)"]
+    Phase2 --> Phase3["3. plan.md (Parallel Waves & Rollback)"]
+    Phase3 --> Phase4["4. tasks.md (Execution Register)"]
+    Phase4 --> Phase5["5. test_lock.md (Characterization Tests)"]
+    Phase5 --> Phase6["6. receipt.md (Sensor Attestation & Deployment)"]
+    Phase6 --> FinalAttestation["Validated Epic Release"]
 ```
-
----
-
-## 🤖 AI Tools Compatibility Matrix
-
-| AI Environment | Integration Type | Path / Configuration |
-| :--- | :--- | :--- |
-| **Kilo / KiloCode** | Native Rules & Tools | `.kilo/kilo.jsonc` & `.kilo/rules/ai-native-sdlc.md` |
-| **Cursor** | Project Rules | `.cursorrules` / `.kilo/rules/` |
-| **Claude Code** | CLI & Sub-loops | Direct tool call via `sdlc` |
-| **Windsurf** | Agent Rules | `.windsurfrules` |
-| **Aider / Copilot** | CLI Utilities | Standard shell execution |
 
 ---
 
@@ -63,16 +56,54 @@ pip install -e .
 ## 🛠️ CLI Usage
 
 ```bash
-# Display help and available commands
-sdlc --help
+# Initialize a new 6-phase epic
+sdlc init user-auth-epic
+
+# Check completion status of all 6 phases
+sdlc check user-auth-epic
+
+# List all active epics in workspace
+sdlc list
 ```
+
+---
+
+## 🐍 Python API
+
+```python
+from ai_native_sdlc import SDLCManager, EpicReport
+
+manager = SDLCManager(base_dir="./artifacts")
+
+# Initialize 6 artifact files
+epic_dir = manager.init_epic("payment-gateway")
+print(f"Scaffolded epic at: {epic_dir}")
+
+# Check phase completion
+status: EpicReport = manager.report("payment-gateway")
+print(f"Complete: {status.complete}")
+for phase, exists in status.phases.items():
+    print(f"  {phase}: {'DONE' if exists else 'PENDING'}")
+```
+
+---
+
+## 🤖 AI Tools Compatibility Matrix
+
+| AI Environment | Integration Type | Path / Configuration |
+| :--- | :--- | :--- |
+| **Kilo / KiloCode** | Native Rules & Tools | `.kilo/kilo.jsonc` & `.kilo/rules/ai-native-sdlc.md` |
+| **Cursor** | Project Rules | `.cursorrules` / `.kilo/rules/` |
+| **Claude Code** | CLI & Sub-loops | Direct tool call via `sdlc` |
+| **Windsurf** | Agent Rules | `.windsurfrules` |
+| **Aider / Copilot** | CLI Utilities | Standard shell execution |
 
 ---
 
 ## 🧪 Testing & Stress Benchmarks
 
 ```bash
-# Run pytest stress test suite
+# Run pytest stress test suite (100 parallel epics initialized in <0.5s)
 pytest -v tests/test_stress.py
 ```
 
