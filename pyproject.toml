@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-native-sdlc"
-version = "1.0.0"
+version = "1.1.0"
 description = "6-Phase Artifact Loop Engine & Spec-Driven Development Framework for AI Coding Agents"
 readme = "README.md"
 authors = [

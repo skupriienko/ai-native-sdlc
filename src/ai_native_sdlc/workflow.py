@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -45,11 +46,26 @@ PHASE_TEMPLATES = {
 
 def sanitize_epic_name(epic_name: str) -> str:
     """Sanitizes epic name to prevent CWE-22 path traversal attacks."""
-    # Strip dangerous characters and path separators
     clean = re.sub(r"[^a-zA-Z0-9_-]", "-", epic_name).strip("-")
     if not clean:
         raise ValueError("Invalid epic name: must contain alphanumeric characters")
     return clean
+
+
+@dataclass(frozen=True)
+class EpicReport:
+    """Status report for a 6-phase artifact epic."""
+
+    epic: str
+    complete: bool
+    phases: dict[str, bool]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "epic": self.epic,
+            "complete": self.complete,
+            "phases": self.phases,
+        }
 
 
 class SDLCManager:
@@ -61,7 +77,6 @@ class SDLCManager:
     def _resolve_epic_dir(self, epic_name: str) -> Path:
         safe_name = sanitize_epic_name(epic_name)
         target = (self.base_dir / safe_name).resolve()
-        # Enforce boundary within base_dir
         if not target.is_relative_to(self.base_dir):
             raise ValueError(
                 f"Security Alert: Path traversal attempt blocked for epic '{epic_name}'"
@@ -69,6 +84,7 @@ class SDLCManager:
         return target
 
     def init_epic(self, epic_name: str) -> Path:
+        """Creates the 6-phase markdown artifact files for the epic."""
         epic_dir = self._resolve_epic_dir(epic_name)
         epic_dir.mkdir(parents=True, exist_ok=True)
         for phase, template in PHASE_TEMPLATES.items():
@@ -77,14 +93,24 @@ class SDLCManager:
                 f.write_text(template, encoding="utf-8")
         return epic_dir
 
-    def check_epic(self, epic_name: str) -> dict[str, Any]:
+    def report(self, epic_name: str) -> EpicReport:
+        """Returns typed EpicReport."""
         epic_dir = self._resolve_epic_dir(epic_name)
-        status = {}
-        for phase in PHASES:
-            f = epic_dir / f"{phase}.md"
-            status[phase] = f.exists()
-        return {
-            "epic": sanitize_epic_name(epic_name),
-            "complete": all(status.values()),
-            "phases": status,
-        }
+        status = {phase: (epic_dir / f"{phase}.md").exists() for phase in PHASES}
+        return EpicReport(
+            epic=sanitize_epic_name(epic_name),
+            complete=all(status.values()),
+            phases=status,
+        )
+
+    def check_epic(self, epic_name: str) -> dict[str, Any]:
+        """Backward-compatible dictionary check."""
+        return self.report(epic_name).to_dict()
+
+    def list_epics(self) -> list[str]:
+        """Lists all existing epics in base directory."""
+        if not self.base_dir.exists():
+            return []
+        return sorted(
+            [d.name for d in self.base_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
+        )
