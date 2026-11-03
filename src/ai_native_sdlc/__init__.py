@@ -1,3 +1,5 @@
-"""Package ai_native_sdlc."""
+"""ai-native-sdlc: 6-Phase Artifact Loop Engine & Spec-Driven Development."""
 
-__version__ = "1.0.0"
+from ai_native_sdlc.loop import EpicReport, SDLCManager
+
+__all__ = ["EpicReport", "SDLCManager"]

@@ -1,7 +1,7 @@
 import time
 from pathlib import Path
 
-from ai_native_sdlc.workflow import SDLCManager
+from ai_native_sdlc.loop import SDLCManager
 
 
 def test_stress_sdlc_manager(tmp_path: Path):

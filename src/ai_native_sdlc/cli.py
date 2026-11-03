@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 
-from ai_native_sdlc.workflow import SDLCManager
+from ai_native_sdlc.loop import SDLCManager
 
 
 def main() -> None:
